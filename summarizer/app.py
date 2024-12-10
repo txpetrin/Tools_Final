@@ -47,7 +47,7 @@ def create_tables():
 def index():
     if request.method == 'POST':
         data = request.get_json()
-        prompt = data.get('text', '').strip()
+        prompt = data.get('text')
 
         
         response_text = input_prompt(prompt)
