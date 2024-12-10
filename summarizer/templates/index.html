@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Prompt Responses</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 10px;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .container {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>ChatGPT Document Summarizer</h1>
+
+    <!-- Form to submit a new prompt -->
+    <div class="container">
+        <input type="text" id="promptInput" placeholder="Enter your prompt here">
+        <button onclick="submitPrompt()">Submit</button>
+    </div>
+
+    <div id="responseContainer">
+        <!-- The response will appear here after the prompt is submitted -->
+    </div>
+
+    <!-- Display all previous responses in a table -->
+    <h2>Previous Responses</h2>
+    <table id="responseTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Prompt</th>
+                <th>Response</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for response in responses %}
+                <tr>
+                    <td>{{ response.id }}</td>
+                    <td>{{ response.prompt }}</td>
+                    <td>{{ response.response }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        // Function to submit the prompt to the Flask backend
+        function submitPrompt() {
+            const prompt = document.getElementById('promptInput').value;
+
+            const data = { text: prompt };
+
+            fetch("/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the response in the response container
+                const responseContainer = document.getElementById('responseContainer');
+                responseContainer.innerHTML = `
+                    <h3>Response:</h3>
+                    <p><strong>Prompt:</strong> ${prompt}</p>
+                    <p><strong>Response:</strong> ${data.response}</p>
+                `;
+                document.getElementById('promptInput').value = '';
+                appendToTable(prompt, data.response);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("An error occurred. Please try again.");
+            });
+        }
+
+        // Function to append the new response to the table dynamically
+        function appendToTable(prompt, response) {
+            const table = document.getElementById('responseTable').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+            const idCell = newRow.insertCell(0);
+            const promptCell = newRow.insertCell(1);
+            const responseCell = newRow.insertCell(2);
+            
+            // Create a simple unique ID for the new entry (could be improved with a server-side ID)
+            const newId = table.rows.length;
+
+            idCell.textContent = newId;
+            promptCell.textContent = prompt;
+            responseCell.textContent = response;
+        }
+    </script>
+
+</body>
+</html>
